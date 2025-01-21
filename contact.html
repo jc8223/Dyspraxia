@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consultation Page</title>
+    <style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f0f8ff;
+    }
+
+    header {
+        background-color: #4caf50;
+        padding: 20px;
+        text-align: center;
+        color: white;
+        font-size: 24px;
+    }
+
+    .container {
+        max-width: 90%;
+        margin: 20px auto;
+        padding: 20px;
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+        color: #333;
+        font-size: 1.5rem;
+    }
+
+    .section {
+        margin-bottom: 30px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+        font-size: 0.9rem;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea,
+    button {
+        width: 100%;
+        padding: 10px;
+        font-size: 1rem;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-sizing: border-box;
+    }
+
+    button {
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        cursor: pointer;
+        font-size: 1rem;
+    }
+
+    button:hover {
+        background-color: #45a049;
+    }
+
+    .messages {
+        max-height: 200px;
+        overflow-y: auto;
+        border: 1px solid #ccc;
+        padding: 10px;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+    }
+
+    .message {
+        margin-bottom: 10px;
+        padding: 10px;
+        border-radius: 5px;
+        background-color: #e7f3ff;
+    }
+
+    .message.sent {
+        background-color: #d4f4dc;
+        text-align: right;
+    }
+
+    @media (max-width: 768px) {
+        h2 {
+            font-size: 1.3rem;
+        }
+
+        .container {
+            padding: 15px;
+        }
+
+        button {
+            font-size: 0.9rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        header {
+            font-size: 20px;
+            padding: 15px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            font-size: 0.9rem;
+            padding: 8px;
+        }
+
+        button {
+            font-size: 0.8rem;
+            padding: 8px;
+        }
+    }
+</style>
+
+</head>
+<body>
+    <header>Consultation Page</header>
+    <div class="container">
+        <!-- Appointment Booking Section -->
+        <div class="section">
+            <h2>Book an Appointment</h2>
+            <div class="form-group">
+                <label for="doctor">Select Doctor</label>
+                <select id="doctor">
+                    <option value="Dr. Smith">Dr. Smith</option>
+                    <option value="Dr. Johnson">Dr. Johnson</option>
+                    <option value="Dr. Patel">Dr. Patel</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="date">Select Date</label>
+                <input type="date" id="date">
+            </div>
+            <div class="form-group">
+                <label for="time">Select Time</label>
+                <input type="time" id="time">
+            </div>
+            <button onclick="bookAppointment()">Book Appointment</button>
+            <p id="appointment-status"></p>
+        </div>
+
+        <!-- Messaging Section -->
+        <div class="section">
+            <h2>Message Your Doctor</h2>
+            <div class="messages" id="messageBox">
+                <!-- Example Messages -->
+                <div class="message sent">Hello, Doctor!</div>
+                <div class="message">Hello! How can I assist you today?</div>
+            </div>
+            <div class="form-group">
+                <label for="messageInput">Type a message</label>
+                <textarea id="messageInput" rows="3"></textarea>
+            </div>
+            <button onclick="sendMessage()">Send Message</button>
+        </div>
+
+        <!-- Video Call Section -->
+        <div class="section">
+            <h2>Video Call</h2>
+            <p>Click below to start a video call with your doctor.</p>
+            <button onclick="startVideoCall()">Start Video Call</button>
+        </div>
+    </div>
+
+    <script>
+        // Appointment Booking
+        function bookAppointment() {
+            const doctor = document.getElementById('doctor').value;
+            const date = document.getElementById('date').value;
+            const time = document.getElementById('time').value;
+
+            if (doctor && date && time) {
+                document.getElementById('appointment-status').textContent = `Appointment booked with ${doctor} on ${date} at ${time}.`;
+                alert('Appointment booked successfully!');
+            } else {
+                alert('Please fill in all fields.');
+            }
+        }
+
+        // Messaging System
+        function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const messageBox = document.getElementById('messageBox');
+            const message = messageInput.value.trim();
+
+            if (message) {
+                // Display user message
+                const userMessage = document.createElement('div');
+                userMessage.className = 'message sent';
+                userMessage.textContent = message;
+                messageBox.appendChild(userMessage);
+
+                // Scroll to the latest message
+                messageBox.scrollTop = messageBox.scrollHeight;
+
+                // Clear input
+                messageInput.value = '';
+
+                // Simulate doctor response
+                setTimeout(() => {
+                    const doctorMessage = document.createElement('div');
+                    doctorMessage.className = 'message';
+                    doctorMessage.textContent = 'Thank you for your message. I will get back to you shortly.';
+                    messageBox.appendChild(doctorMessage);
+                    messageBox.scrollTop = messageBox.scrollHeight;
+                }, 1000);
+            }
+        }
+
+        // Video Call Simulation
+        function startVideoCall() {
+            alert('Starting video call...');
+            // Backend integration can use WebRTC or similar for video calls.
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dyspraxia Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            width: 250px;
+            background-color: #e8f5e9;
+            border: 2px solid #4CAF50;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 30px 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            border-radius: 0 20px 20px 0;
+            box-shadow: 4px 0 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .navbar a {
+            text-decoration: none;
+            color: black;
+            padding: 15px 25px;
+            margin: 12px 0;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            border-radius: 10px;
+            transition: background-color 0.3s, transform 0.3s;
+            font-weight: bold;
+        }
+
+        .navbar a:hover {
+            background-color: #FFB74D;
+            transform: scale(1.05);
+        }
+
+        .navbar a.active {
+            color: white;
+            background-color: #388E3C;
+        }
+
+        .navbar .material-icons {
+            margin-right: 12px;
+            font-size: 22px;
+        }
+
+        .container {
+            margin-left: 270px;
+            padding: 20px;
+            width: calc(100% - 270px);
+            flex-grow: 1;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            font-size: 24px;
+        }
+
+        .game-selection {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            gap: 20px;
+        }
+
+        .game-option {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            background-color: #e8f5e9;
+            border: 2px solid #4CAF50;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.3s, background-color 0.3s;
+        }
+
+        .game-option:hover {
+            background-color: #c8e6c9;
+            transform: scale(1.05);
+        }
+
+        .game-icon {
+            margin-right: 10px;
+            font-size: 18px;
+            color: #4CAF50;
+        }
+
+        .chart-container {
+            width: 90%;
+            max-width: 700px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin: 20px auto;
+        }
+
+        .analytics-buttons {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 10px;
+            gap: 15px;
+        }
+
+        .analytics-button {
+            padding: 10px 24px;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            text-transform: uppercase;
+        }
+
+        .analytics-button:hover {
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .analytics-button.active {
+            background-color: #388E3C;
+        }
+
+        /* Responsive Design */
+        @media screen and (max-width: 768px) {
+            .navbar {
+                position: static;
+                width: 100%;
+                height: auto;
+                flex-direction: row;
+                padding: 10px 0;
+                justify-content: center;
+                border-radius: 0;
+            }
+
+            .navbar a {
+                margin: 5px 10px;
+                padding: 10px 15px;
+                font-size: 14px;
+            }
+
+            .container {
+                margin: 0;
+                padding: 10px;
+                width: 100%;
+            }
+
+            .chart-container {
+                width: 100%;
+            }
+
+            h1 {
+                font-size: 20px;
+            }
+
+            .game-option {
+                padding: 10px 15px;
+                font-size: 14px;
+            }
+
+            .game-icon {
+                font-size: 16px;
+            }
+
+            .analytics-button {
+                padding: 8px 20px;
+                font-size: 12px;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .navbar a {
+                margin: 5px 5px;
+                padding: 8px 10px;
+                font-size: 12px;
+            }
+
+            .navbar {
+                flex-wrap: wrap;
+            }
+
+            .game-option {
+                flex: 1 1 100%;
+                margin-bottom: 10px;
+                text-align: center;
+            }
+
+            .analytics-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            h1 {
+                font-size: 18px;
+            }
+        }
+
+        .navbar-toggle {
+            display: none;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 20px;
+        }
+
+        .navbar-toggle:focus {
+            outline: none;
+        }
+
+        /* Navbar Items - Hidden by default on small devices */
+        .navbar-items {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .navbar-items.hidden {
+            display: none;
+        }
+
+        /* Responsive Design for Toggle */
+        @media screen and (max-width: 768px) {
+            .navbar {
+                position: static;
+                width: 100%;
+                height: auto;
+                flex-direction: column;
+                padding: 10px 0;
+                justify-content: center;
+                border-radius: 0;
+            }
+
+            .navbar-toggle {
+                display: block;
+            }
+
+            .navbar-items {
+                flex-direction: column;
+                gap: 8px;
+            }
+        }
+    </style>
+
+</head>
+
+<body>
+    <!-- Navbar -->
+    <div class="navbar">
+        <button class="navbar-toggle" onclick="toggleNavbar()">☰ MENU</button>
+        <div class="navbar-items">
+            <a href="#" class="active"><span class="material-icons">dashboard</span> Dashboard</a>
+            <a href="contact.html"><span class="material-icons">support_agent</span> Consult</a>
+            <a href="Report.html"><span class="material-icons">info</span> Weekly Report</a>
+            <a href="login.html"><span class="material-icons">logout</span> Logout</a>
+        </div>
+    </div>
+
+
+
+    <!-- Main Content -->
+    <div class="container">
+        <h1>Dyspraxia Therapy Dashboard</h1>
+
+        <!-- Game Selection Section -->
+        <div class="game-selection">
+            <div class="game-option" onclick="playGame('Game 1')">
+                <a href="challengeone.html"><span class="game-icon">🎮</span> Game 1</a>
+            </div>
+            <div class="game-option" onclick="playGame('Game 2')">
+                <a href="maze.html"><span class="game-icon">🚀</span> Game 2 </a>
+            </div>
+            <div class="game-option" onclick="playGame('Game 3')">
+                <a href="Memory.html"><span class="game-icon">🏆</span> Game 3</a>
+            </div>
+        </div>
+
+        <!-- Chart Section -->
+        <div class="chart-container">
+            <canvas id="analyticsChart"></canvas>
+        </div>
+
+        <!-- Analytics Buttons -->
+        <div class="analytics-buttons">
+            <button class="analytics-button active" onclick="showGameAnalytics('Game 1', this)">Game 1</button>
+            <button class="analytics-button" onclick="showGameAnalytics('Game 2', this)">Game 2</button>
+            <button class="analytics-button" onclick="showGameAnalytics('Game 3', this)">Game 3</button>
+        </div>
+    </div>
+
+    <script>
+        function toggleNavbar() {
+            const navbarItems = document.querySelector('.navbar-items');
+            navbarItems.classList.toggle('hidden');
+        }
+        const sheetId = "1muTZHon_FFwu0CR35y5ZkchcaP6q1XRL2Flp2w5YB-g";
+        const apiKey = "AIzaSyCfdx1zGo2yoycHgUXKd8rSR_dyt5jQ9WQ"; // Replace with your valid API key
+        const sheetRange = "Sheet1!A:F"; // Adjust range as needed
+        let gameData = {};
+
+        // Fetch Game Data from Google Sheets
+        async function fetchGameData() {
+
+
+            const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${sheetRange}?key=${apiKey}`;
+
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.values) {
+                    const [headers, ...rows] = data.values;
+
+                    // Parse data into gameData
+                    rows.forEach(row => {
+                        const [game, ...scores] = row;
+                        gameData[game] = scores.map(score => parseFloat(score) || 0); // Convert scores to numbers
+                    });
+
+                    console.log("Fetched Game Data:", gameData);
+                    return gameData;
+                } else {
+                    console.error("No data found.");
+                    return {};
+                }
+            } catch (error) {
+                console.error("Error fetching game data:", error);
+                return {};
+            }
+        }
+
+
+        // Initialize the Chart
+        async function initializeChart() {
+            await fetchGameData();
+
+            const ctx = document.getElementById("analyticsChart").getContext("2d");
+            const analyticsChart = new Chart(ctx, {
+                type: "bar",
+                data: {
+                    labels: ["Week 1", "Week 2", "Week 3", "Week 4", "Week 5"],
+                    datasets: [{
+                        label: "Game 1 Performance",
+                        data: gameData["Game 1"] || [0, 0, 0, 0, 0], // Default data
+                        backgroundColor: "rgba(75, 192, 192, 0.6)",
+                        borderColor: "rgba(75, 192, 192, 1)",
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: "top"
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            window.showGameAnalytics = (game, button) => {
+                if (!gameData[game]) {
+                    alert(`No data available for ${game}`);
+                    return;
+                }
+
+                analyticsChart.data.datasets[0].data = gameData[game];
+                analyticsChart.data.datasets[0].label = `${game} Performance`;
+                analyticsChart.update();
+
+                // Highlight the active button
+                document.querySelectorAll(".analytics-button").forEach(btn => btn.classList.remove("active"));
+                button.classList.add("active");
+            };
+        }
+
+
+        // Call Initialization
+        initializeChart();
+    </script>
+</body>
+
+</html>

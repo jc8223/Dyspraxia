@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maze Runner</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #f4faff;
+        }
+
+        #maze-container {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            background-color: #f8f9fa;
+            border: 5px solid #3e64ff;
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            grid-template-rows: repeat(10, 1fr);
+            gap: 1px;
+        }
+
+        .cell {
+            background-color: #e1ebfc;
+            border: 1px solid #d6d6d6;
+        }
+
+        .wall {
+            background-color: #3e64ff;
+        }
+
+        .goal {
+            background-color: #5cb85c;
+        }
+
+        .ball {
+            background-color: #f05050;
+            border-radius: 50%;
+        }
+
+        #stats {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 1.2em;
+        }
+
+        #level-info {
+            margin-bottom: 10px;
+            font-size: 1.5em;
+            color: #3e64ff;
+        }
+    </style>
+</head>
+<body>
+    <div id="level-info">Level: 1</div>
+    <div>
+        <div id="maze-container"></div>
+        <div id="stats">
+            <p>Total Attempts: <span id="attempts">0</span></p>
+            <p>Total Time: <span id="time">0</span> seconds</p>
+        </div>
+    </div>
+
+    <audio id="success-sound" src="https://www.soundjay.com/button/beep-07.wav"></audio>
+    <audio id="error-sound" src="https://www.soundjay.com/button/beep-10.wav"></audio>
+
+    <audio id="background-music" src="https://www.bensound.com/bensound-music/bensound-funnysong.mp3" loop></audio>
+
+
+    <script>
+        const levels = [
+            // Level 1
+            [
+                [' ', ' ', ' ', 'W', 'W', 'W', ' ', ' ', ' ', 'G'],
+                ['W', 'W', ' ', 'W', ' ', ' ', ' ', 'W', 'W', 'W'],
+                [' ', ' ', ' ', 'W', ' ', 'W', ' ', ' ', ' ', ' '],
+                [' ', 'W', ' ', ' ', ' ', 'W', 'W', 'W', 'W', ' '],
+                [' ', 'W', 'W', 'W', ' ', ' ', ' ', ' ', 'W', ' '],
+                [' ', ' ', ' ', ' ', ' ', 'W', 'W', ' ', 'W', ' '],
+                ['W', 'W', 'W', 'W', ' ', 'W', ' ', ' ', 'W', ' '],
+                [' ', ' ', ' ', ' ', ' ', ' ', ' ', 'W', 'W', ' '],
+                [' ', 'W', 'W', 'W', 'W', 'W', ' ', ' ', ' ', ' '],
+                ['S', ' ', ' ', ' ', ' ', ' ', 'W', 'W', 'W', ' '],
+            ],
+            // Level 2
+            [
+                [' ', 'W', 'W', 'W', 'W', 'W', 'W', 'W', ' ', 'G'],
+                [' ', ' ', ' ', ' ', ' ', ' ', ' ', 'W', ' ', ' '],
+                [' ', 'W', 'W', 'W', 'W', 'W', ' ', 'W', 'W', ' '],
+                [' ', 'W', ' ', ' ', ' ', ' ', ' ', ' ', 'W', ' '],
+                [' ', 'W', ' ', 'W', 'W', 'W', 'W', ' ', 'W', ' '],
+                [' ', 'W', ' ', ' ', ' ', ' ', ' ', ' ', 'W', ' '],
+                [' ', 'W', 'W', 'W', 'W', 'W', 'W', ' ', 'W', ' '],
+                [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+                ['W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', ' '],
+                ['S', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+            ],
+            // Level 3
+            [
+                [' ', 'W', ' ', ' ', ' ', 'W', ' ', ' ', ' ', 'G'],
+                [' ', 'W', ' ', 'W', ' ', 'W', ' ', 'W', ' ', ' '],
+                [' ', ' ', ' ', 'W', ' ', ' ', ' ', 'W', ' ', 'W'],
+                [' ', 'W', 'W', 'W', ' ', 'W', ' ', ' ', ' ', 'W'],
+                [' ', ' ', ' ', ' ', ' ', 'W', 'W', 'W', ' ', ' '],
+                ['W', 'W', 'W', ' ', 'W', ' ', ' ', 'W', 'W', 'W'],
+                [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+                ['W', ' ', 'W', 'W', 'W', 'W', 'W', 'W', ' ', 'W'],
+                ['W', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+                ['S', ' ', 'W', 'W', 'W', 'W', 'W', 'W', 'W', ' '],
+            ],
+            // Level 4 (New)
+            [
+                [' ', 'W', ' ', 'W', 'W', 'W', 'W', 'W', ' ', 'G'],
+                [' ', 'W', ' ', ' ', ' ', ' ', ' ', 'W', ' ', ' '],
+                [' ', 'W', 'W', 'W', 'W', 'W', ' ', 'W', ' ', ' '],
+                [' ', ' ', ' ', ' ', ' ', ' ', ' ', 'W', ' ', ' '],
+                ['W', 'W', 'W', 'W', 'W', 'W', ' ', ' ', ' ', ' '],
+                [' ', ' ', ' ', ' ', ' ', ' ', ' ', 'W', 'W', ' '],
+                ['W', 'W', 'W', 'W', 'W', 'W', ' ', ' ', ' ', ' '],
+                [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+                [' ', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', ' '],
+                ['S', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+            ],
+            // Level 5 (New)
+            [
+                [' ', ' ', ' ', 'W', 'W', 'W', ' ', ' ', ' ', 'G'],
+                ['W', 'W', ' ', 'W', ' ', ' ', ' ', 'W', 'W', 'W'],
+                [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+                [' ', 'W', ' ', 'W', 'W', ' ', ' ', 'W', ' ', ' '],
+                [' ', ' ', ' ', ' ', ' ', ' ', 'W', ' ', 'W', ' '],
+                [' ', 'W', 'W', 'W', ' ', 'W', ' ', ' ', 'W', ' '],
+                [' ', ' ', ' ', 'W', ' ', 'W', 'W', ' ', ' ', ' '],
+                [' ', 'W', ' ', ' ', ' ', ' ', ' ', ' ', 'W', ' '],
+                [' ', ' ', ' ', 'W', 'W', 'W', 'W', 'W', ' ', ' '],
+                ['S', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+            ],
+        ];
+
+        const backgroundMusic = document.getElementById('background-music'); backgroundMusic.play();
+
+
+        let currentLevel = 0;
+        let ballPosition = { x: 0, y: 9 };
+        let attempts = 0;
+
+        const mazeContainer = document.getElementById('maze-container');
+        const levelInfo = document.getElementById('level-info');
+        const attemptsDisplay = document.getElementById('attempts');
+        const successSound = document.getElementById('success-sound');
+        const errorSound = document.getElementById('error-sound');
+
+        function renderMaze() {
+            mazeContainer.innerHTML = '';
+            const maze = levels[currentLevel];
+            maze.forEach((row, y) => {
+                row.forEach((cell, x) => {
+                    const div = document.createElement('div');
+                    div.classList.add('cell');
+                    if (cell === 'W') div.classList.add('wall');
+                    if (cell === 'G') div.classList.add('goal');
+                    if (ballPosition.x === x && ballPosition.y === y) div.classList.add('ball');
+                    mazeContainer.appendChild(div);
+                });
+            });
+        }
+
+        function moveBall(dx, dy) {
+            const maze = levels[currentLevel];
+            const newX = ballPosition.x + dx;
+            const newY = ballPosition.y + dy;
+
+            if (newX >= 0 && newY >= 0 && newX < 10 && newY < 10) {
+                if (maze[newY][newX] === 'W') {
+                    errorSound.play();
+                    attempts++;
+                } else {
+                    ballPosition = { x: newX, y: newY };
+                    if (maze[newY][newX] === 'G') {
+                        successSound.play();
+                        if (currentLevel < levels.length - 1) {
+                            alert(`Level ${currentLevel + 1} complete! Moving to Level ${currentLevel + 2}`);
+                            currentLevel++;
+                            ballPosition = { x: 0, y: 9 };
+                        } else {
+                            alert('Congratulations! You have completed all levels!');
+                        }
+                    }
+                }
+            }
+
+            attempts++;
+            attemptsDisplay.textContent = attempts;
+            levelInfo.textContent = `Level: ${currentLevel + 1}`;
+            renderMaze();
+        }
+
+        document.addEventListener('keydown', (e) => {
+            switch (e.key) {
+                case 'ArrowUp':
+                    moveBall(0, -1);
+                    break;
+                case 'ArrowDown':
+                    moveBall(0, 1);
+                    break;
+                case 'ArrowLeft':
+                    moveBall(-1, 0);
+                    break;
+                case 'ArrowRight':
+                    moveBall(1, 0);
+                    break;
+            }
+        });
+
+        renderMaze();
+    </script>
+</body>
+</html>

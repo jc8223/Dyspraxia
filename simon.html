@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simon Says Game with Voice</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f8ff;
+            margin: 0;
+            padding: 0;
+        }
+
+        .game-container {
+            margin: 5% auto;
+            padding: 20px;
+            max-width: 90%;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            color: #333;
+            font-size: 2em;
+        }
+
+        #instructions {
+            font-size: 1.2em;
+            color: #555;
+            margin: 10px 0;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin: 20px auto;
+            max-width: 250px;
+        }
+
+        .color-button {
+            width: 100%;
+            aspect-ratio: 1;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .color-button:hover {
+            transform: scale(1.1);
+        }
+
+        .red {
+            background-color: #ff4d4d;
+        }
+
+        .blue {
+            background-color: #4d79ff;
+        }
+
+        .green {
+            background-color: #4dff88;
+        }
+
+        .yellow {
+            background-color: #ffec4d;
+        }
+
+        .start-button {
+            padding: 10px 20px;
+            font-size: 1em;
+            background-color: #4d79ff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .start-button:hover {
+            background-color: #3b5bb5;
+        }
+
+        #score {
+            font-size: 1.2em;
+            margin-top: 20px;
+            color: #333;
+        }
+
+        .active {
+            filter: brightness(1.5);
+        }
+
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 15px;
+                margin: 10%;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            #instructions {
+                font-size: 1em;
+            }
+
+            .buttons {
+                max-width: 200px;
+            }
+
+            .start-button {
+                padding: 8px 16px;
+                font-size: 0.9em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.5em;
+            }
+
+            #instructions {
+                font-size: 0.9em;
+            }
+
+            .buttons {
+                gap: 8px;
+                max-width: 180px;
+            }
+
+            .start-button {
+                padding: 6px 12px;
+                font-size: 0.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Simon Says</h1>
+        <p id="instructions">Follow Simon's instructions carefully!</p>
+        <div class="buttons">
+            <button id="red" class="color-button red"></button>
+            <button id="blue" class="color-button blue"></button>
+            <button id="green" class="color-button green"></button>
+            <button id="yellow" class="color-button yellow"></button>
+        </div>
+        <button id="start-button" class="start-button">Start Game</button>
+        <p id="score">Score: 0</p>
+    </div>
+    <script>
+        const colors = ["red", "blue", "green", "yellow"];
+        let sequence = [];
+        let playerSequence = [];
+        let score = 0;
+
+        const startButton = document.getElementById("start-button");
+        const instructions = document.getElementById("instructions");
+        const scoreDisplay = document.getElementById("score");
+        const colorButtons = colors.map(color => document.getElementById(color));
+
+        // Speak a message using the Web Speech API
+        function speak(message) {
+            const utterance = new SpeechSynthesisUtterance(message);
+            utterance.lang = "en-US";
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function playSequence() {
+            let i = 0;
+            instructions.textContent = "Watch Simon's moves!";
+            const interval = setInterval(() => {
+                if (i < sequence.length) {
+                    highlightButton(sequence[i]);
+                    speak(sequence[i]); // Speak the color name
+                    i++;
+                } else {
+                    clearInterval(interval);
+                    instructions.textContent = "Your turn!";
+                }
+            }, 1000);
+        }
+
+        function highlightButton(color) {
+            const button = document.getElementById(color);
+            button.classList.add("active");
+            setTimeout(() => button.classList.remove("active"), 500);
+        }
+
+        function checkPlayerInput(color) {
+            playerSequence.push(color);
+            highlightButton(color);
+
+            if (playerSequence[playerSequence.length - 1] !== sequence[playerSequence.length - 1]) {
+                instructions.textContent = "Wrong! Game Over!";
+                speak("Game Over! You scored " + score + " points.");
+                startButton.style.display = "block";
+                return;
+            }
+
+            if (playerSequence.length === sequence.length) {
+                score++;
+                scoreDisplay.textContent = `Score: ${score}`;
+                speak("Great job! Get ready for the next round.");
+                playerSequence = [];
+                addNewColor();
+            }
+        }
+
+        function addNewColor() {
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            sequence.push(randomColor);
+            setTimeout(playSequence, 1000);
+        }
+
+        function startGame() {
+            score = 0;
+            sequence = [];
+            playerSequence = [];
+            scoreDisplay.textContent = "Score: 0";
+            startButton.style.display = "none";
+            instructions.textContent = "Watch carefully!";
+            speak("Welcome to Simon Says! Let's start!");
+            addNewColor();
+        }
+
+        startButton.addEventListener("click", startGame);
+
+        colorButtons.forEach(button => {
+            button.addEventListener("click", () => {
+                if (sequence.length > 0) {
+                    checkPlayerInput(button.id);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

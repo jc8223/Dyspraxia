@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive Memory Matching Game</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .game-container {
+            display: grid;
+            gap: 2vw;
+            justify-content: center;
+            align-items: center;
+            width: 90%;
+            max-width: 600px;
+        }
+
+        .card {
+            background-color: #87ceeb;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 4vw;
+            font-weight: bold;
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+            user-select: none;
+            transform: scale(1);
+            transition: transform 0.2s, background-color 0.3s;
+        }
+
+        .card.hidden {
+            background-color: #87ceeb;
+            color: transparent;
+        }
+
+        .card.matched {
+            background-color: #4caf50;
+            pointer-events: none;
+        }
+
+        #stats {
+            margin-top: 10px;
+            font-size: 4vw;
+            color: #333;
+            text-align: center;
+        }
+
+        #timer {
+            font-size: 5vw;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        #restart-button {
+            margin-top: 10px;
+            padding: 1em 2em;
+            font-size: 4vw;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #restart-button:hover {
+            background-color: #45a049;
+        }
+
+        @media (min-width: 600px) {
+            .game-container {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 15px;
+            }
+
+            .card {
+                font-size: 24px;
+                width: 100px;
+                height: 100px;
+            }
+
+            #stats, #timer {
+                font-size: 18px;
+            }
+
+            #restart-button {
+                font-size: 18px;
+            }
+        }
+
+        @media (max-width: 599px) {
+            .game-container {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
+            }
+
+            .card {
+                font-size: 6vw;
+                width: 20vw;
+                height: 20vw;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .game-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .card {
+                font-size: 8vw;
+                width: 22vw;
+                height: 22vw;
+            }
+
+            #timer {
+                font-size: 6vw;
+            }
+
+            #stats {
+                font-size: 5vw;
+            }
+
+            #restart-button {
+                font-size: 5vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <div id="timer">Time: 0:00</div>
+        <div class="game-container" id="gameContainer"></div>
+        <div id="stats">
+            <p id="attempts">Attempts: 0</p>
+            <p id="fails">Fails: 0</p>
+        </div>
+        <button id="restart-button" style="display: none;">Restart</button>
+    </div>
+
+    <script>
+        // JavaScript code remains the same
+        const gameContainer = document.getElementById('gameContainer');
+        const attemptsDisplay = document.getElementById('attempts');
+        const failsDisplay = document.getElementById('fails');
+        const timerDisplay = document.getElementById('timer');
+        const restartButton = document.getElementById('restart-button');
+
+        const cardValues = ['🍎', '🍌', '🍓', '🍇', '🍒', '🍍', '🍉', '🥝'];
+        let cards = [...cardValues, ...cardValues];
+        let firstCard = null;
+        let secondCard = null;
+        let matchesFound = 0;
+        let attempts = 0;
+        let fails = 0;
+
+        let timerInterval;
+        let timerSeconds = 0;
+
+        function playMessage(text) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            speechSynthesis.speak(utterance);
+        }
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function initGame() {
+            matchesFound = 0;
+            attempts = 0;
+            fails = 0;
+            timerSeconds = 0;
+            firstCard = null;
+            secondCard = null;
+            updateStats();
+            updateTimer();
+            gameContainer.innerHTML = '';
+            cards = [...cardValues, ...cardValues];
+            shuffle(cards);
+
+            clearInterval(timerInterval);
+            restartButton.style.display = 'none';
+
+            cards.forEach(value => {
+                const card = document.createElement('div');
+                card.classList.add('card');
+                card.dataset.value = value;
+                card.textContent = value;
+                card.addEventListener('click', () => flipCard(card));
+                gameContainer.appendChild(card);
+            });
+
+            setTimeout(() => {
+                document.querySelectorAll('.card').forEach(card => {
+                    card.classList.add('hidden');
+                    card.textContent = '';
+                });
+                playMessage('Start the game! Match all the pairs.');
+                startTimer();
+            }, 5000);
+        }
+
+        function updateStats() {
+            attemptsDisplay.textContent = `Attempts: ${attempts}`;
+            failsDisplay.textContent = `Fails: ${fails}`;
+        }
+
+        function updateTimer() {
+            const minutes = Math.floor(timerSeconds / 60);
+            const seconds = timerSeconds % 60;
+            timerDisplay.textContent = `Time: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timerSeconds++;
+                updateTimer();
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+        }
+
+        function flipCard(card) {
+            if (card.classList.contains('matched') || card === firstCard || secondCard) {
+                return;
+            }
+
+            card.textContent = card.dataset.value;
+            card.classList.remove('hidden');
+
+            if (!firstCard) {
+                firstCard = card;
+            } else if (!secondCard) {
+                secondCard = card;
+                attempts++;
+                updateStats();
+
+                if (firstCard.dataset.value === secondCard.dataset.value) {
+                    firstCard.classList.add('matched');
+                    secondCard.classList.add('matched');
+                    playMessage('Good job! You found a match.');
+                    matchesFound++;
+                    firstCard = null;
+                    secondCard = null;
+
+                    if (matchesFound === cardValues.length) {
+                        playMessage('Congratulations! You matched all the cards!');
+                        restartButton.style.display = 'block';
+                        stopTimer();
+                    }
+                } else {
+                    fails++;
+                    updateStats();
+                    playMessage('Try again.');
+                    setTimeout(() => {
+                        firstCard.classList.add('hidden');
+                        firstCard.textContent = '';
+                        secondCard.classList.add('hidden');
+                        secondCard.textContent = '';
+                        firstCard = null;
+                        secondCard = null;
+                    }, 1000);
+                }
+            }
+        }
+
+        restartButton.addEventListener('click', () => {
+            playMessage('Restarting the game. Memorize the cards.');
+            initGame();
+        });
+
+        playMessage('Welcome to the Memory Matching Game. Memorize the cards!');
+        initGame();
+    </script>
+</body>
+</html>

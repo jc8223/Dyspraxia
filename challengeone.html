@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Challenge</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #e7f3ff; /* Light blue background */
+            color: #333;
+        }
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, #004e92, #00c6ff); /* Gradient background */
+            padding: 15px 30px; /* Increased padding */
+            color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+            border-radius: 0; /* No rounded edges */
+        }
+        .navbar-left {
+            display: flex;
+            align-items: center;
+        }
+        .navbar-left img {
+            width: 50px; /* Adjust logo size */
+            height: auto;
+            margin-right: 10px;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s; /* Transition for all properties */
+            padding: 10px 15px; /* Padding for clickable area */
+            border-radius: 8px; /* Rounded edges for links */
+        }
+        .navbar a img {
+            width: 24px; /* Adjust icon size */
+            height: auto;
+            margin-right: 5px;
+        }
+        .navbar a:hover {
+            background-color: rgba(255, 255, 255, 0.2); /* Light hover effect */
+            color: #ffcc00; /* Change color on hover */
+            transform: scale(1.1); /* Scale up on hover */
+        }
+        .shape-container {
+            display: flex; /* Use flexbox for layout */
+            justify-content: space-between; /* Space between items */
+            align-items: flex-start; /* Align items at the start */
+            background: #FFFFFF;
+            padding: 40px; /* Increased padding */
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            width: 90%; /* Adjust width for a larger container */
+            max-width: 800px; /* Max width to keep it manageable */
+            margin: 40px auto; /* Center the shape container */
+        }
+        .left-section, .right-section {
+            flex: 1; /* Allow both sections to grow equally */
+            padding: 0 20px; /* Padding for both sections */
+        }
+        .shape {
+            width: 0; /* Shape width is determined by borders */
+            height: 0; /* Shape height is determined by borders */
+            border-left: 100px solid transparent;
+            border-right: 100px solid transparent;
+            border-bottom: 173.2px solid #00c6ff; /* Triangle color */
+            margin-bottom: 20px; /* Space below the shape */
+            margin-left:78px;
+        }
+        #timer {
+            font-size: 1.5em;
+            color: #FF6F61;
+            text-align: center; /* Center timer text */
+            margin: 20px 0; /* Space above and below timer */
+        }
+        #start-timer, #clear-canvas {
+            padding: 10px 20px;
+            background-color: #00c6ff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 100%; /* Full width for buttons */
+        }
+        #start-timer:hover {
+            background-color: #004e92; /* Darker on hover */
+        }
+        #clear-canvas {
+            background-color: #ff6f61; /* Red for clear button */
+            margin-top: 10px; /* Space above clear button */
+        }
+        #clear-canvas:hover {
+            background-color: #c73d39; /* Darker on hover */
+        }
+        .instructions {
+            font-size: 1.2em; /* Increased font size for instructions */
+            color: #555;
+            margin-bottom: 10px;
+            text-align: center; /* Center instructions text */
+        }
+        #canvas {
+            border: 1px solid #ccc; /* Border for canvas */
+            cursor: crosshair; /* Change cursor to crosshair for drawing */
+            width: 100%; /* Full width for canvas */
+            height: 200px; /* Fixed height for canvas */
+        }
+        .result {
+            font-size: 1.2em; /* Increased font size for result */
+            color: #333;
+            text-align: center; /* Center result text */
+            margin-top: 20px; /* Space above result */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <div class="navbar-left">
+            <img src="https://cdn-icons-png.flaticon.com/512/2981/2981662.png" alt="Logo"> <!-- New Logo -->
+            <h2>ShapeChase</h2>
+        </div>
+        <div class="navbar-right" style="display: flex; align-items: center;">
+            <a href="#"><img src="https://img.icons8.com/ios-filled/50/ffffff/home.png" alt="Home Icon"> Home</a>
+            <a href="#"><img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="Profile Icon"> Profile</a>
+            <a href="#"><img src="https://img.icons8.com/ios-filled/50/ffffff/info.png" alt="About Icon"> About Us</a>
+            <a href="#"><img src="https://img.icons8.com/ios-filled/50/ffffff/running.png" alt="Dyspraxia Icon"> Dyspraxia</a>
+            <a href="#"><img src="https://img.icons8.com/ios-filled/50/ffffff/phone.png" alt="Contact Icon"> Contact Us</a>
+        </div>
+    </div>
+
+    <div class="shape-container">
+        <div class="left-section">
+            <div class="instructions">
+                You need to make the following shape:
+            </div>
+            <div class="shape"></div> <!-- Triangle shape -->
+            <div id="timer">Time Left: 5 seconds</div>
+            <button id="start-timer">Start Timer when Ready!</button>
+        </div>
+        <div class="right-section">
+            <h3>Draw the Shape</h3>
+            <canvas id="canvas"></canvas>
+            <button id="clear-canvas">Clear Canvas</button>
+            <div class="result" id="result">
+        </div>
+    </div>
+
+    <script>
+        let timer; // Declare timer variable
+        const startTimerButton = document.getElementById('start-timer');
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+        let drawing = false;
+
+        // Start timer function
+        startTimerButton.addEventListener('click', function () {
+            let timeLeft = 5; // Reset time for each button click
+            document.getElementById('timer').innerText = `Time Left: ${timeLeft} seconds`;
+
+            timer = setInterval(function () {
+                timeLeft--;
+                document.getElementById('timer').innerText = `Time Left: ${timeLeft} seconds`;
+
+                if (timeLeft === 0) {
+                    clearInterval(timer);
+                    document.getElementById('timer').innerText = 'Time Left: 0 seconds';
+                    detectShape('Triangle'); // Send shape for detection
+                }
+            }, 1000);
+        });
+
+        // Draw on canvas
+        canvas.addEventListener('mousedown', function (e) {
+            drawing = true;
+            context.clearRect(0, 0, canvas.width, canvas.height); // Clear previous drawing
+            context.beginPath();
+            const x = e.offsetX;
+            const y = e.offsetY;
+            context.moveTo(x, y);
+            context.lineTo(x - 100, y + 173.2); // Draw triangle
+            context.lineTo(x + 100, y + 173.2);
+            context.closePath();
+            context.fillStyle = '#00c6ff'; // Fill color for triangle
+            context.fill();
+        });
+
+        canvas.addEventListener('mouseup', function () {
+            drawing = false;
+        });
+
+        canvas.addEventListener('mousemove', function (e) {
+            if (!drawing) return;
+            const x = e.offsetX;
+            const y = e.offsetY;
+            context.lineTo(x, y);
+            context.stroke();
+        });
+
+        // Clear canvas functionality
+        document.getElementById('clear-canvas').addEventListener('click', function () {
+            context.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
+        });
+
+        function detectShape(selectedShape) {
+			fetch('/detect_shape', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({ shape: selectedShape }),
+			})
+				.then(response => response.json())
+				.then(data => {
+					document.getElementById('result').innerText = data.result;
+				})
+				.catch(error => {
+					document.getElementById('result').innerText = 'Error: Could not detect shape.';
+					console.error('Error:', error);
+				});
+		}
+    </script>
+</body>
+</html>
