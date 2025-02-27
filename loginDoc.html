@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - ShapeChase</title>
+    <style>
+        /* General styling */
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to right, #4facfe, #00f2fe);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            color: #333;
+            overflow: hidden;
+        }
+
+        /* Animation keyframes */
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(-20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            text-align: center;
+            animation: fadeIn 0.8s ease-out; /* Fade-in effect */
+            transition: transform 0.3s ease; /* Transition for hover effect */
+        }
+
+        .container:hover {
+            transform: scale(1.05); /* Scaling on hover */
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2); /* Enhanced shadow */
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .logo-container img {
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+        }
+
+        .logo-container h1 {
+            font-size: 1.6rem;
+            color: #333;
+            margin: 0;
+        }
+
+        .login-form h2 {
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-size: 1.5rem;
+        }
+
+        .login-form p {
+            margin-bottom: 2rem;
+            color: #666;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        button {
+            width: 100%;
+            padding: 0.5rem;
+            background-color: #4facfe;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #00f2fe;
+        }
+
+        .signup-link {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .signup-link a {
+            color: #4facfe;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .signup-link a:hover {
+            color: #00f2fe;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo-container">
+            <img src="https://cdn-icons-png.flaticon.com/512/2981/2981662.png" alt="Logo">
+            <h1>ShapeChase</h1>
+        </div>
+        <form class="login-form" onsubmit="return validateForm()">
+            <h2>Welcome Doctor!</h2>
+            <p>Login to continue your journey with us.</p>
+            <div class="input-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit">Login</button>
+            <p class="signup-link">Don't have an account? <a href="/signup">Sign up</a></p>
+        </form>
+    </div>
+    <script>
+        function validateForm() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (username !== 'Review' && password !== '1234') {
+                alert('Incorrect username and password.');
+                return false;
+            } else if (username !== 'Review') {
+                alert('Incorrect username.');
+                return false;
+            } else if (password !== '1234') {
+                alert('Incorrect password.');
+                return false;
+            } else {
+                window.location.href = "DashboardDoctor.html";
+                return false;
+            }
+        }
+    </script>
+</body>
+</html>

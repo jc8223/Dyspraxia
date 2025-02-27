@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Obstacle Dash 🚀</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Press Start 2P', cursive;
+        }
+
+        body {
+            text-align: center;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: white;
+            overflow: hidden;
+        }
+
+        h1 {
+            font-size: 28px;
+            text-shadow: 3px 3px 10px #00f2ff;
+        }
+
+        h2 {
+            font-size: 20px;
+            text-shadow: 2px 2px 8px #ff00ff;
+        }
+
+        canvas {
+            background: #0f3460;
+            display: block;
+            margin: auto;
+            border: 4px solid #ff00ff;
+            box-shadow: 0px 0px 15px 5px #ff00ff;
+        }
+
+        #gameOverScreen {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0px 0px 15px 5px red;
+            text-align: center;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            background: #ff00ff;
+            color: white;
+            border-radius: 5px;
+            transition: 0.3s ease-in-out;
+            box-shadow: 0px 0px 10px #ff00ff;
+        }
+
+        button:hover {
+            background: #00f2ff;
+            box-shadow: 0px 0px 15px #00f2ff;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <h1>🚀 Obstacle Dash</h1>
+    <h2>Difficulty: <span id="difficultyLevel">Easy</span></h2>
+    <canvas id="gameCanvas" width="800" height="400"></canvas>
+    <div id="gameOverScreen">
+        <h2>Game Over 💀</h2>
+        <p>Score: <span id="finalScore">0</span></p>
+        <button onclick="restartGame()">Try Again</button>
+    </div>
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        let gameOver = false;
+        let score = 0;
+        let obstacles = [];
+        let difficulty = "Easy";
+        let obstacleSpeed = 5;
+        let gravity = 0.5;
+        let jumpPower = -10;
+        let difficultyIncreaseInterval;
+        let windEffect = 0;
+
+        const player = {
+            x: 50,
+            y: 300,
+            width: 30,
+            height: 30,
+            color: "cyan",
+            velocityY: 0,
+            isJumping: false
+        };
+
+        function drawPlayer() {
+            ctx.fillStyle = player.color;
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+        }
+
+        function jump() {
+            if (!player.isJumping) {
+                player.velocityY = jumpPower;
+                player.isJumping = true;
+            }
+        }
+
+        function updatePlayer() {
+            player.y += player.velocityY;
+            player.velocityY += gravity;
+            if (player.y >= 300) {
+                player.y = 300;
+                player.isJumping = false;
+            }
+            player.x -= windEffect;
+        }
+
+        function createObstacle() {
+            const size = Math.random() * (50 - 20) + 20;
+            const moveType = Math.random() < 0.2 ? "moving" : "static";
+            const invisible = Math.random() < 0.1;
+            obstacles.push({
+                x: 800,
+                y: 300,
+                width: size,
+                height: size,
+                speed: obstacleSpeed,
+                moveType: moveType,
+                moveDirection: 1,
+                invisible: invisible,
+                opacity: invisible ? 0.3 : 1
+            });
+        }
+
+        function updateObstacles() {
+            for (let i = 0; i < obstacles.length; i++) {
+                obstacles[i].x -= obstacles[i].speed;
+
+                if (obstacles[i].moveType === "moving") {
+                    obstacles[i].y += obstacles[i].moveDirection * 2;
+                    if (obstacles[i].y <= 250 || obstacles[i].y >= 320) {
+                        obstacles[i].moveDirection *= -1;
+                    }
+                }
+
+                if (obstacles[i].x + obstacles[i].width < 0) {
+                    obstacles.splice(i, 1);
+                    score++;
+                }
+            }
+        }
+
+        function drawObstacles() {
+            for (let obs of obstacles) {
+                ctx.fillStyle = `rgba(255, 0, 255, ${obs.opacity})`;
+                ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+            }
+        }
+
+        function checkCollision() {
+            for (let obs of obstacles) {
+                if (
+                    player.x < obs.x + obs.width &&
+                    player.x + player.width > obs.x &&
+                    player.y < obs.y + obs.height &&
+                    player.y + player.height > obs.y
+                ) {
+                    endGame();
+                }
+            }
+        }
+
+        function endGame() {
+            gameOver = true;
+            clearInterval(difficultyIncreaseInterval);
+            document.getElementById("finalScore").textContent = score;
+            document.getElementById("gameOverScreen").style.display = "block";
+        }
+
+        function restartGame() {
+            gameOver = false;
+            score = 0;
+            obstacles = [];
+            player.y = 300;
+            obstacleSpeed = 5;
+            gravity = 0.5;
+            jumpPower = -10;
+            windEffect = 0;
+            difficulty = "Easy";
+            document.getElementById("difficultyLevel").textContent = difficulty;
+            document.getElementById("gameOverScreen").style.display = "none";
+            setDifficultyIncrease();
+            gameLoop();
+        }
+
+        function increaseDifficulty() {
+            if (score > 10) { difficulty = "Medium"; obstacleSpeed += 2; gravity += 0.1; }
+            if (score > 20) { difficulty = "Hard"; obstacleSpeed += 2; }
+            if (score > 30) { difficulty = "Extreme"; jumpPower += 2; windEffect = 0.3; }
+            if (score > 40) { difficulty = "Insane"; gravity += 0.2; obstacleSpeed += 3; }
+            if (score > 50) { difficulty = "Impossible"; windEffect = 0.5; jumpPower += 3; }
+
+            document.getElementById("difficultyLevel").textContent = difficulty;
+        }
+
+        function setDifficultyIncrease() {
+            difficultyIncreaseInterval = setInterval(increaseDifficulty, 5000);
+        }
+
+        function gameLoop() {
+            if (gameOver) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawPlayer();
+            updatePlayer();
+            updateObstacles();
+            drawObstacles();
+            checkCollision();
+            requestAnimationFrame(gameLoop);
+        }
+
+        document.addEventListener("keydown", (e) => {
+            if (e.code === "Space") jump();
+        });
+
+        setInterval(createObstacle, 2000);
+        setDifficultyIncrease();
+        gameLoop();
+    </script>
+</body>
+</html>

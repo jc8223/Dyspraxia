@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Messaging</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+        }
+
+        header {
+            background-color: #007bff;
+            padding: 20px;
+            text-align: center;
+            color: white;
+            font-size: 24px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .profile,
+        .analytics,
+        .feedback {
+            margin-bottom: 30px;
+        }
+
+        .profile img {
+            width: 100px;
+            border-radius: 50%;
+            margin-right: 20px;
+        }
+
+        .profile-info {
+            display: flex;
+            align-items: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        table th,
+        table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+
+        table th {
+            background-color: #f4f4f4;
+            font-weight: bold;
+        }
+
+        .progress-bar {
+            background-color: #e9ecef;
+            border-radius: 5px;
+            height: 20px;
+            width: 100%;
+        }
+
+        .progress {
+            height: 100%;
+            border-radius: 5px;
+            background-color: #007bff;
+            width: 70%;
+            /* Example value */
+        }
+
+        textarea,
+        button {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            margin-top: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <header>Doctor Analytics Dashboard</header>
+    <div class="container">
+        <!-- User Profile Section -->
+        <div class="profile">
+            <h2>User Profile</h2>
+            <div class="profile-info">
+                <div>
+                    <p><strong>Name:</strong> John Doe</p>
+                    <p><strong>Age:</strong> 7</p>
+                    <p><strong>Gender:</strong> Male</p>
+                    <p><strong>Diagnosis Date:</strong> Jan 15, 2023</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Section -->
+        <div class="analytics">
+            <h2>Performance Analytics</h2>
+            <table>
+                <tr>
+                    <th>Game</th>
+                    <th>Attempts</th>
+                    <th>Fails</th>
+                    <th>Successes</th>
+                </tr>
+                <tr>
+                    <td>Simon Says</td>
+                    <td>50</td>
+                    <td>10</td>
+                    <td>40</td>
+                </tr>
+                <tr>
+                    <td>Memory Matching</td>
+                    <td>30</td>
+                    <td>5</td>
+                    <td>25</td>
+                </tr>
+            </table>
+            <h3>Overall Progress</h3>
+            <div class="progress-bar">
+                <div class="progress" style="width: 75%;"></div>
+            </div>
+            <p>Progress: 75%</p>
+        </div>
+        <div class="feedback">
+            <h2>Doctor Feedback</h2>
+            <textarea rows="5" class="docFed" type="text" id="message" placeholder="Write your feedback here..."></textarea>
+            <button onclick="sendMessage()">Submit Feedback</button>
+            <p id="status"></p>
+        </div>
+    
+    </div>
+
+    <script>
+        function sendMessage() {
+            const message = document.getElementById("message").value;
+            if (!message) {
+                alert("Please enter a message.");
+                return;
+            }
+
+            fetch("https://script.google.com/macros/s/AKfycby-wYlyLo-E26oLdYlM3pb39Ky_EgkF-zNCp8YfwhGHwqBRKdhqHWFBvoAClkC-wB8/exec", {  // Replace with your Google Apps Script URL
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: new URLSearchParams({ message: message })
+            })
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById("status").innerText = data;
+                    document.getElementById("message").value = "";
+                })
+                .catch(error => console.error("Error:", error));
+        }
+    </script>
+</body>
+
+</html>
