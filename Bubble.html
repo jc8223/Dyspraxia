@@ -210,6 +210,15 @@
             startGame();
         }
 
+        function nextLevel() {
+            level++;
+            levelDisplay.textContent = `Level: ${level}`;
+            bubbleCount += 2;
+            memorizeTime = Math.max(3000, memorizeTime - 500);
+            roundTime = Math.max(5, roundTime - 1);
+            startGame();
+        }
+
         function startGame() {
             gameContainer.innerHTML = "";
             numbers = [];
