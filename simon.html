@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -140,6 +141,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="game-container">
         <h1>Simon Says</h1>
@@ -152,6 +154,7 @@
         </div>
         <button id="start-button" class="start-button">Start Game</button>
         <p id="score">Score: 0</p>
+        <button id="submit-button" class="start-button">submit</button>
     </div>
     <script>
         const colors = ["red", "blue", "green", "yellow"];
@@ -161,6 +164,7 @@
 
         const startButton = document.getElementById("start-button");
         const instructions = document.getElementById("instructions");
+        const submitButton = document.getElementById("submit-button");
         const scoreDisplay = document.getElementById("score");
         const colorButtons = colors.map(color => document.getElementById(color));
 
@@ -170,6 +174,32 @@
             utterance.lang = "en-US";
             window.speechSynthesis.speak(utterance);
         }
+
+
+        submitButton.addEventListener("click", () => {
+            const url = "https://script.google.com/macros/s/AKfycbzAMryzabcycN8dkaQxCap0hLtsyRN0X-nwEcWddmUMts2sLdc-yk4JsI5wOjuk4NS6/exec";
+
+            fetch(url, {
+                method: "POST",
+                mode: "no-cors", // Required for Apps Script unless you setup proper CORS
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: `score=${score}`
+            })
+                .then(() => {
+                    speak("Score submitted successfully!");
+                    alert("Score submitted successfully!");
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    speak("Error submitting score");
+                    alert("Error submitting score");
+                });
+        });
+
+
+
 
         function playSequence() {
             let i = 0;
@@ -240,4 +270,5 @@
         });
     </script>
 </body>
+
 </html>
