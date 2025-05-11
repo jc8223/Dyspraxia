@@ -134,10 +134,12 @@
         <h2>Game Over 💀</h2>
         <p>Score: <span id="finalScore">0</span></p>
         <button onclick="restartGame()">Try Again</button>
+        <button id="submit-button">submit</button>
     </div>
     <script>
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
+        const submitButton = document.getElementById("submit-button");
         let gameOver = false;
         let score = 0;
         let obstacles = [];
@@ -180,6 +182,7 @@
             player.x -= windEffect;
         }
 
+        
         function createObstacle() {
             const size = Math.random() * (50 - 20) + 20;
             const moveType = Math.random() < 0.2 ? "moving" : "static";
@@ -214,6 +217,8 @@
                 }
             }
         }
+
+        
 
         function drawObstacles() {
             for (let obs of obstacles) {
@@ -290,6 +295,32 @@
         setInterval(createObstacle, 2000);
         setDifficultyIncrease();
         gameLoop();
+
+        submitButton.addEventListener("click", () => {
+            const url = "https://script.google.com/macros/s/AKfycbzQrmhmB2-5X0XkyOzEb-MoaHNZCVJWcdcwGgMI5M2dBVRLhXsyP6NExRd_rJJxGKxt/exec";
+
+            fetch(url, {
+                method: "POST",
+                mode: "no-cors", // Required for Apps Script unless you setup proper CORS
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: `score=${score}`
+            })
+                .then(() => {
+                    speak("Score submitted successfully!");
+                    alert("Score submitted successfully!");
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    speak("Error submitting score");
+                    alert("Error submitting score");
+                });
+        });
+
+        
     </script>
+
+    
 </body>
 </html>
